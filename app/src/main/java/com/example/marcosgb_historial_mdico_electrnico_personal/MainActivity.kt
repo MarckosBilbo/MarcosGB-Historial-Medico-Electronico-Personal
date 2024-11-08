@@ -1,47 +1,45 @@
-package com.example.marcosgb_historial_mdico_electrnico_personal
+package com.example.historialmedico
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.marcosgb_historial_mdico_electrnico_personal.ui.theme.MarcosGBHistorialMédicoElectrónicoPersonalTheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.Firebase
+import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.SQLite
+
 
 class MainActivity : ComponentActivity() {
+    private lateinit var sqliteHelper: SQLite
+    private lateinit var firebaseHelper: Firebase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        sqliteHelper = SQLite(this)
+        firebaseHelper = Firebase()
+
         setContent {
-            MarcosGBHistorialMédicoElectrónicoPersonalTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            MyApp(sqliteHelper = sqliteHelper, firebaseHelper = firebaseHelper)
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun MyApp(sqliteHelper: SQLite, firebaseHelper: Firebase) {
+    val navController = rememberNavController()
+    var backgroundColor by remember { mutableStateOf(Color.Gray) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MarcosGBHistorialMédicoElectrónicoPersonalTheme {
-        Greeting("Android")
+    NavHost(navController = navController, startDestination = "pantalla_principal") {
+        composable("pantalla_principal") {
+            PantallaPrincipal(
+                navController = navController,
+                backgroundColor = backgroundColor,
+                sqliteHelper = sqliteHelper,
+                firebaseHelper = firebaseHelper
+            )
+        }
     }
 }
