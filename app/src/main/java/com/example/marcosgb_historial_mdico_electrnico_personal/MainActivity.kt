@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.Firebase
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.SQLite
+import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaPrincipal
 
 
 class MainActivity : ComponentActivity() {
