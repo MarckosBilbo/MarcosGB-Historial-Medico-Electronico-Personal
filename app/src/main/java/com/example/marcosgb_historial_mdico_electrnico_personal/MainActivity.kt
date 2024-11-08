@@ -1,4 +1,4 @@
-package com.example.historialmedico
+package com.example.marcosgb_historial_mdico_electrnico_personal
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
