@@ -13,6 +13,7 @@ import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.SQLite
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaLogin
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaPrincipal
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaRegistro
+import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PanelControl
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp(sqliteHelper: SQLite, firebaseHelper: Firebase, firebaseAuth: FirebaseAuth) {
     val navController = rememberNavController()
-    var backgroundColor by remember { mutableStateOf(Color.Gray) }
+    var colorFondo by remember { mutableStateOf(Color.Gray) }
 
     NavHost(navController = navController, startDestination = "pantalla_login") {
         composable("pantalla_login") {
@@ -49,14 +50,22 @@ fun MyApp(sqliteHelper: SQLite, firebaseHelper: Firebase, firebaseAuth: Firebase
             if (user != null) {
                 PantallaPrincipal(
                     navController = navController,
-                    backgroundColor = backgroundColor,
+                    colorFondo = colorFondo,
                     sqliteHelper = sqliteHelper,
                     firebaseHelper = firebaseHelper,
-                    userId = user.uid
+                    idUsuario = user.uid
                 )
             } else {
                 navController.navigate("pantalla_login")
             }
+        }
+        composable("panel_control") {
+            PanelControl(
+                navController = navController,
+                sqliteHelper = sqliteHelper,
+                firebaseHelper = firebaseHelper,
+                firebaseAuth = firebaseAuth
+            )
         }
     }
 }
