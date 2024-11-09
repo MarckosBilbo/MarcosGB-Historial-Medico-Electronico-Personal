@@ -27,17 +27,13 @@ public class Firebase {
             String encryptedEspecificaciones = Encriptacion.encriptar(historial.getEspecificaciones(), CLAVE_ENCRIPTACION);
             String encryptedUserId = Encriptacion.encriptar(historial.getUserId(), CLAVE_ENCRIPTACION);
 
-            HistorialMedico encryptedHistorial = new HistorialMedico(
-                    historial.getId(),
-                    encryptedNombre,
-                    encryptedFechaNacimiento,
-                    encryptedEdad,
-                    encryptedEstadoSalud,
-                    encryptedEspecificaciones,
-                    encryptedUserId
-            );
-
-            database.child("historiales").child(userId).setValue(encryptedHistorial);
+            DatabaseReference userRef = database.child("historiales").child(userId);
+            userRef.child("nombre").setValue(encryptedNombre);
+            userRef.child("fechaNacimiento").setValue(encryptedFechaNacimiento);
+            userRef.child("edad").setValue(encryptedEdad);
+            userRef.child("estadoSalud").setValue(encryptedEstadoSalud);
+            userRef.child("especificaciones").setValue(encryptedEspecificaciones);
+            userRef.child("userId").setValue(encryptedUserId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,8 +84,39 @@ public class Firebase {
         });
     }
 
+    public void obtenerNumeroUsuarios(final NumeroUsuariosCallback callback) {
+        database.child("usuarios").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int numeroUsuarios = (int) dataSnapshot.getChildrenCount();
+                callback.onSuccess(numeroUsuarios);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onFailure(databaseError.toException());
+            }
+        });
+    }
+
+    public void guardarResultadosEncuesta(String userId, String satisfaccionServicio, String satisfaccionSeguridad, String satisfaccionUtilidad, String tipoProblema, String gravedadProblema, String longevidadProblema, String perfilMedico) {
+        DatabaseReference userRef = database.child("usuarios").child(userId).child("resultadosEncuesta");
+        userRef.child("satisfaccionServicio").setValue(satisfaccionServicio);
+        userRef.child("satisfaccionSeguridad").setValue(satisfaccionSeguridad);
+        userRef.child("satisfaccionUtilidad").setValue(satisfaccionUtilidad);
+        userRef.child("tipoProblema").setValue(tipoProblema);
+        userRef.child("gravedadProblema").setValue(gravedadProblema);
+        userRef.child("longevidadProblema").setValue(longevidadProblema);
+        userRef.child("perfilMedico").setValue(perfilMedico);
+    }
+
     public interface DataCallback {
         void onSuccess(List<HistorialMedico> historiales);
+        void onFailure(Exception e);
+    }
+
+    public interface NumeroUsuariosCallback {
+        void onSuccess(int numeroUsuarios);
         void onFailure(Exception e);
     }
 }
