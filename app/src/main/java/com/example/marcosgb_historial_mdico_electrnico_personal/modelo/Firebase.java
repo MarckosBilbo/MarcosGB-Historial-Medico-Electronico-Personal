@@ -8,7 +8,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Firebase {
     private final DatabaseReference database;
@@ -100,14 +102,61 @@ public class Firebase {
     }
 
     public void guardarResultadosEncuesta(String userId, String satisfaccionServicio, String satisfaccionSeguridad, String satisfaccionUtilidad, String tipoProblema, String gravedadProblema, String longevidadProblema, String perfilMedico) {
-        DatabaseReference userRef = database.child("usuarios").child(userId).child("resultadosEncuesta");
-        userRef.child("satisfaccionServicio").setValue(satisfaccionServicio);
-        userRef.child("satisfaccionSeguridad").setValue(satisfaccionSeguridad);
-        userRef.child("satisfaccionUtilidad").setValue(satisfaccionUtilidad);
-        userRef.child("tipoProblema").setValue(tipoProblema);
-        userRef.child("gravedadProblema").setValue(gravedadProblema);
-        userRef.child("longevidadProblema").setValue(longevidadProblema);
-        userRef.child("perfilMedico").setValue(perfilMedico);
+        try {
+            String encryptedSatisfaccionServicio = Encriptacion.encriptar(satisfaccionServicio, CLAVE_ENCRIPTACION);
+            String encryptedSatisfaccionSeguridad = Encriptacion.encriptar(satisfaccionSeguridad, CLAVE_ENCRIPTACION);
+            String encryptedSatisfaccionUtilidad = Encriptacion.encriptar(satisfaccionUtilidad, CLAVE_ENCRIPTACION);
+            String encryptedTipoProblema = Encriptacion.encriptar(tipoProblema, CLAVE_ENCRIPTACION);
+            String encryptedGravedadProblema = Encriptacion.encriptar(gravedadProblema, CLAVE_ENCRIPTACION);
+            String encryptedLongevidadProblema = Encriptacion.encriptar(longevidadProblema, CLAVE_ENCRIPTACION);
+            String encryptedPerfilMedico = Encriptacion.encriptar(perfilMedico, CLAVE_ENCRIPTACION);
+
+            DatabaseReference userRef = database.child("usuarios").child(userId).child("resultadosEncuesta");
+            userRef.child("satisfaccionServicio").setValue(encryptedSatisfaccionServicio);
+            userRef.child("satisfaccionSeguridad").setValue(encryptedSatisfaccionSeguridad);
+            userRef.child("satisfaccionUtilidad").setValue(encryptedSatisfaccionUtilidad);
+            userRef.child("tipoProblema").setValue(encryptedTipoProblema);
+            userRef.child("gravedadProblema").setValue(encryptedGravedadProblema);
+            userRef.child("longevidadProblema").setValue(encryptedLongevidadProblema);
+            userRef.child("perfilMedico").setValue(encryptedPerfilMedico);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void obtenerResultadosEncuesta(String userId, final ResultadosEncuestaCallback callback) {
+        database.child("usuarios").child(userId).child("resultadosEncuesta").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try {
+                    String satisfaccionServicio = Encriptacion.desencriptar(dataSnapshot.child("satisfaccionServicio").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String satisfaccionSeguridad = Encriptacion.desencriptar(dataSnapshot.child("satisfaccionSeguridad").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String satisfaccionUtilidad = Encriptacion.desencriptar(dataSnapshot.child("satisfaccionUtilidad").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String tipoProblema = Encriptacion.desencriptar(dataSnapshot.child("tipoProblema").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String gravedadProblema = Encriptacion.desencriptar(dataSnapshot.child("gravedadProblema").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String longevidadProblema = Encriptacion.desencriptar(dataSnapshot.child("longevidadProblema").getValue(String.class), CLAVE_ENCRIPTACION);
+                    String perfilMedico = Encriptacion.desencriptar(dataSnapshot.child("perfilMedico").getValue(String.class), CLAVE_ENCRIPTACION);
+
+                    Map<String, String> resultados = new HashMap<>();
+                    resultados.put("satisfaccionServicio", satisfaccionServicio);
+                    resultados.put("satisfaccionSeguridad", satisfaccionSeguridad);
+                    resultados.put("satisfaccionUtilidad", satisfaccionUtilidad);
+                    resultados.put("tipoProblema", tipoProblema);
+                    resultados.put("gravedadProblema", gravedadProblema);
+                    resultados.put("longevidadProblema", longevidadProblema);
+                    resultados.put("perfilMedico", perfilMedico);
+
+                    callback.onSuccess(resultados);
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onFailure(databaseError.toException());
+            }
+        });
     }
 
     public interface DataCallback {
@@ -117,6 +166,11 @@ public class Firebase {
 
     public interface NumeroUsuariosCallback {
         void onSuccess(int numeroUsuarios);
+        void onFailure(Exception e);
+    }
+
+    public interface ResultadosEncuestaCallback {
+        void onSuccess(Map<String, String> resultados);
         void onFailure(Exception e);
     }
 }
