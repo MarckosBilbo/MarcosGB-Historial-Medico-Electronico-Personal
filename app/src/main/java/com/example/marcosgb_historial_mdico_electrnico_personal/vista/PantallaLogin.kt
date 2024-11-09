@@ -16,46 +16,55 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun PantallaLogin(navController: NavHostController, firebaseAuth: FirebaseAuth) {
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
-    var errorMessage by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf(TextFieldValue("")) }
+    var contrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var mensajeError by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
         TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
+            value = contrasena,
+            onValueChange = { contrasena = it },
+            label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
         Button(
             onClick = {
-                firebaseAuth.signInWithEmailAndPassword(email.text, password.text)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            navController.navigate("pantalla_principal")
-                        } else {
-                            errorMessage = task.exception?.message ?: "Login failed"
+                if (correo.text.isEmpty() || contrasena.text.isEmpty()) {
+                    mensajeError = "Por favor, completa todos los campos."
+                } else {
+                    firebaseAuth.signInWithEmailAndPassword(correo.text, contrasena.text)
+                        .addOnCompleteListener { tarea ->
+                            if (tarea.isSuccessful) {
+                                val user = firebaseAuth.currentUser
+                                if (user != null && user.isEmailVerified) {
+                                    navController.navigate("pantalla_principal")
+                                } else {
+                                    mensajeError = "Por favor, verifica tu correo electrónico."
+                                }
+                            } else {
+                                mensajeError = tarea.exception?.message ?: "Error al iniciar sesión"
+                            }
                         }
-                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Login")
+            Text("Iniciar sesión")
         }
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+        if (mensajeError.isNotEmpty()) {
+            Text(mensajeError, color = Color.Red, modifier = Modifier.padding(top = 16.dp))
         }
         Button(
             onClick = { navController.navigate("pantalla_registro") },
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
         ) {
-            Text("Go to Register")
+            Text("Ir a Registro")
         }
     }
 }

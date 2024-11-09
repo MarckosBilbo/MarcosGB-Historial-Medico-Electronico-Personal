@@ -16,57 +16,66 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun PantallaRegistro(navController: NavHostController, firebaseAuth: FirebaseAuth) {
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
-    var confirmPassword by remember { mutableStateOf(TextFieldValue("")) }
-    var errorMessage by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf(TextFieldValue("")) }
+    var contrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var confirmarContrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var mensajeError by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
         TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
+            value = contrasena,
+            onValueChange = { contrasena = it },
+            label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
         TextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
+            value = confirmarContrasena,
+            onValueChange = { confirmarContrasena = it },
+            label = { Text("Confirmar Contraseña") },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
         Button(
             onClick = {
-                if (password.text == confirmPassword.text) {
-                    firebaseAuth.createUserWithEmailAndPassword(email.text, password.text)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                navController.navigate("pantalla_login")
+                if (correo.text.isEmpty() || contrasena.text.isEmpty() || confirmarContrasena.text.isEmpty()) {
+                    mensajeError = "Por favor, completa todos los campos."
+                } else if (contrasena.text != confirmarContrasena.text) {
+                    mensajeError = "Las contraseñas no coinciden"
+                } else {
+                    firebaseAuth.createUserWithEmailAndPassword(correo.text, contrasena.text)
+                        .addOnCompleteListener { tarea ->
+                            if (tarea.isSuccessful) {
+                                val user = firebaseAuth.currentUser
+                                user?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
+                                    if (verificationTask.isSuccessful) {
+                                        mensajeError = "Registro exitoso. Por favor, verifica tu correo electrónico."
+                                    } else {
+                                        mensajeError = "Error al enviar el correo de verificación."
+                                    }
+                                }
                             } else {
-                                errorMessage = task.exception?.message ?: "Registration failed"
+                                mensajeError = tarea.exception?.message ?: "Error al registrarse"
                             }
                         }
-                } else {
-                    errorMessage = "Passwords do not match"
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register")
+            Text("Registrarse")
         }
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+        if (mensajeError.isNotEmpty()) {
+            Text(mensajeError, color = Color.Red, modifier = Modifier.padding(top = 16.dp))
         }
         Button(
             onClick = { navController.navigate("pantalla_login") },
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
         ) {
-            Text("Go to Login")
+            Text("Ir a Iniciar sesión")
         }
     }
 }
