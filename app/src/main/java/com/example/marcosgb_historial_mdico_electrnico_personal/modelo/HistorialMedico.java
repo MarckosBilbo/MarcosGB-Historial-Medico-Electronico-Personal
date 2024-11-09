@@ -4,15 +4,27 @@ public class HistorialMedico {
     private int id;
     private String nombre;
     private String fechaNacimiento;
-    private String historial;
+    private String edad;
+    private String estadoSalud;
+    private String especificaciones;
+    private String userId;
 
-    public HistorialMedico(int id, String nombre, String fechaNacimiento, String historial) {
+    // No-argument constructor
+    public HistorialMedico() {
+    }
+
+    // Constructor with all fields
+    public HistorialMedico(int id, String nombre, String fechaNacimiento, String edad, String estadoSalud, String especificaciones, String userId) {
         this.id = id;
         this.nombre = nombre;
         this.fechaNacimiento = fechaNacimiento;
-        this.historial = historial;
+        this.edad = edad;
+        this.estadoSalud = estadoSalud;
+        this.especificaciones = especificaciones;
+        this.userId = userId;
     }
 
+    // Getters and setters
     public int getId() {
         return id;
     }
@@ -25,8 +37,20 @@ public class HistorialMedico {
         return fechaNacimiento;
     }
 
-    public String getHistorial() {
-        return historial;
+    public String getEdad() {
+        return edad;
+    }
+
+    public String getEstadoSalud() {
+        return estadoSalud;
+    }
+
+    public String getEspecificaciones() {
+        return especificaciones;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public void setId(int id) {
@@ -41,7 +65,19 @@ public class HistorialMedico {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public void setHistorial(String historial) {
-        this.historial = historial;
+    public void setEdad(String edad) {
+        this.edad = edad;
+    }
+
+    public void setEstadoSalud(String estadoSalud) {
+        this.estadoSalud = estadoSalud;
+    }
+
+    public void setEspecificaciones(String especificaciones) {
+        this.especificaciones = especificaciones;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
