@@ -36,6 +36,14 @@ fun PantallaPrincipal(
     var idHistorialActual by remember { mutableStateOf(0) }
     var contrasenaActual by remember { mutableStateOf(TextFieldValue("")) }
 
+    var satisfaccionServicio by remember { mutableStateOf("") }
+    var satisfaccionSeguridad by remember { mutableStateOf("") }
+    var satisfaccionUtilidad by remember { mutableStateOf("") }
+    var tipoProblema by remember { mutableStateOf("") }
+    var gravedadProblema by remember { mutableStateOf("") }
+    var longevidadProblema by remember { mutableStateOf("") }
+    var perfilMedico by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         // Obtener historiales desde SQLite
         val historialesSQLite = sqliteHelper.obtenerHistoriales().filter { it.userId == idUsuario }
@@ -71,6 +79,23 @@ fun PantallaPrincipal(
                 }
             })
         }
+
+        // Obtener datos de Firebase
+        firebaseHelper.obtenerResultadosEncuesta(idUsuario, object : Firebase.ResultadosEncuestaCallback {
+            override fun onSuccess(resultados: Map<String, String>) {
+                satisfaccionServicio = resultados["satisfaccionServicio"] ?: ""
+                satisfaccionSeguridad = resultados["satisfaccionSeguridad"] ?: ""
+                satisfaccionUtilidad = resultados["satisfaccionUtilidad"] ?: ""
+                tipoProblema = resultados["tipoProblema"] ?: ""
+                gravedadProblema = resultados["gravedadProblema"] ?: ""
+                longevidadProblema = resultados["longevidadProblema"] ?: ""
+                perfilMedico = resultados["perfilMedico"] ?: ""
+            }
+
+            override fun onFailure(e: Exception) {
+                // Manejar error
+            }
+        })
     }
 
     Scaffold(
@@ -201,6 +226,13 @@ fun PantallaPrincipal(
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
+            Text("Satisfacción del Servicio: $satisfaccionServicio", fontSize = 20.sp)
+            Text("Satisfacción con la Seguridad: $satisfaccionSeguridad", fontSize = 20.sp)
+            Text("Satisfacción con la Utilidad: $satisfaccionUtilidad", fontSize = 20.sp)
+            Text("Tipo de Problema Médico: $tipoProblema", fontSize = 20.sp)
+            Text("Gravedad del Problema: $gravedadProblema", fontSize = 20.sp)
+            Text("Longevidad del Problema: $longevidadProblema", fontSize = 20.sp)
+            Text("Perfil Médico: $perfilMedico", fontSize = 20.sp)
             Button(
                 onClick = { navController.navigate("panel_control") },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
