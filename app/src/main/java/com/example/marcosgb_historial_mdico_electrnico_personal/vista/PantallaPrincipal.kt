@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.Firebase
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.HistorialMedico
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.SQLite
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
@@ -20,10 +21,10 @@ import java.util.*
 @Composable
 fun PantallaPrincipal(
     navController: NavHostController,
-    backgroundColor: Color,
+    colorFondo: Color,
     sqliteHelper: SQLite,
     firebaseHelper: Firebase,
-    userId: String
+    idUsuario: String
 ) {
     var nombre by remember { mutableStateOf(TextFieldValue("")) }
     var fechaNacimiento by remember { mutableStateOf(Calendar.getInstance()) }
@@ -31,41 +32,42 @@ fun PantallaPrincipal(
     var estadoSalud by remember { mutableStateOf("Optimo") }
     var especificaciones by remember { mutableStateOf(TextFieldValue("")) }
     var historiales by remember { mutableStateOf(listOf<HistorialMedico>()) }
-    var isEditing by remember { mutableStateOf(false) }
-    var currentHistorialId by remember { mutableStateOf(0) }
+    var estaEditando by remember { mutableStateOf(false) }
+    var idHistorialActual by remember { mutableStateOf(0) }
+    var contrasenaActual by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(Unit) {
         // Obtener historiales desde SQLite
-        val sqliteHistoriales = sqliteHelper.obtenerHistoriales().filter { it.userId == userId }
-        if (sqliteHistoriales.isNotEmpty()) {
-            historiales = sqliteHistoriales
-            val userHistorial = historiales.first()
-            nombre = TextFieldValue(userHistorial.nombre)
-            fechaNacimiento.time = Date(userHistorial.fechaNacimiento.toLong())
-            edad = TextFieldValue(userHistorial.edad)
-            estadoSalud = userHistorial.estadoSalud
-            especificaciones = TextFieldValue(userHistorial.especificaciones)
-            currentHistorialId = userHistorial.id
-            isEditing = true
+        val historialesSQLite = sqliteHelper.obtenerHistoriales().filter { it.userId == idUsuario }
+        if (historialesSQLite.isNotEmpty()) {
+            historiales = historialesSQLite
+            val historialUsuario = historiales.first()
+            nombre = TextFieldValue(historialUsuario.nombre)
+            fechaNacimiento.time = Date(historialUsuario.fechaNacimiento.toLong())
+            edad = TextFieldValue(historialUsuario.edad)
+            estadoSalud = historialUsuario.estadoSalud
+            especificaciones = TextFieldValue(historialUsuario.especificaciones)
+            idHistorialActual = historialUsuario.id
+            estaEditando = true
         } else {
             // Si no hay datos en SQLite, obtener desde Firebase
             firebaseHelper.obtenerHistoriales(object : Firebase.DataCallback {
                 override fun onSuccess(data: List<HistorialMedico>) {
-                    historiales = data.filter { it.userId == userId }
+                    historiales = data.filter { it.userId == idUsuario }
                     if (historiales.isNotEmpty()) {
-                        val userHistorial = historiales.first()
-                        nombre = TextFieldValue(userHistorial.nombre)
-                        fechaNacimiento.time = Date(userHistorial.fechaNacimiento.toLong())
-                        edad = TextFieldValue(userHistorial.edad)
-                        estadoSalud = userHistorial.estadoSalud
-                        especificaciones = TextFieldValue(userHistorial.especificaciones)
-                        currentHistorialId = userHistorial.id
-                        isEditing = true
+                        val historialUsuario = historiales.first()
+                        nombre = TextFieldValue(historialUsuario.nombre)
+                        fechaNacimiento.time = Date(historialUsuario.fechaNacimiento.toLong())
+                        edad = TextFieldValue(historialUsuario.edad)
+                        estadoSalud = historialUsuario.estadoSalud
+                        especificaciones = TextFieldValue(historialUsuario.especificaciones)
+                        idHistorialActual = historialUsuario.id
+                        estaEditando = true
                     }
                 }
 
                 override fun onFailure(e: Exception) {
-                    // Handle error
+                    // Manejar error
                 }
             })
         }
@@ -84,7 +86,7 @@ fun PantallaPrincipal(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                     ) {
-                        Text("Logout")
+                        Text("Cerrar sesión")
                     }
                 }
             )
@@ -94,7 +96,7 @@ fun PantallaPrincipal(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(16.dp)
-                .background(backgroundColor)
+                .background(colorFondo)
         ) {
             TextField(
                 value = nombre,
@@ -134,56 +136,76 @@ fun PantallaPrincipal(
                 label = { Text("Especificaciones del Paciente") },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
+            TextField(
+                value = contrasenaActual,
+                onValueChange = { contrasenaActual = it },
+                label = { Text("Contraseña Actual") },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            )
             Button(
                 onClick = {
-                    val nuevoHistorial = HistorialMedico(
-                        currentHistorialId,
-                        nombre.text,
-                        fechaNacimiento.timeInMillis.toString(),
-                        edad.text,
-                        estadoSalud,
-                        especificaciones.text,
-                        userId
-                    )
-                    if (isEditing) {
-                        sqliteHelper.actualizarHistorial(nuevoHistorial)
-                        firebaseHelper.updateHistorial(nuevoHistorial, userId)
-                    } else {
-                        sqliteHelper.insertarHistorial(nuevoHistorial)
-                        firebaseHelper.saveHistorial(nuevoHistorial, userId)
-                    }
-                    // Update the UI after saving
-                    val sqliteHistoriales = sqliteHelper.obtenerHistoriales().filter { it.userId == userId }
-                    historiales = sqliteHistoriales
-                    if (historiales.isNotEmpty()) {
-                        val userHistorial = historiales.first()
-                        nombre = TextFieldValue(userHistorial.nombre)
-                        fechaNacimiento.time = Date(userHistorial.fechaNacimiento.toLong())
-                        edad = TextFieldValue(userHistorial.edad)
-                        estadoSalud = userHistorial.estadoSalud
-                        especificaciones = TextFieldValue(userHistorial.especificaciones)
-                        currentHistorialId = userHistorial.id
-                        isEditing = true
-                    } else {
-                        nombre = TextFieldValue("")
-                        fechaNacimiento = Calendar.getInstance()
-                        edad = TextFieldValue("")
-                        estadoSalud = "Optimo"
-                        especificaciones = TextFieldValue("")
-                        currentHistorialId = 0
-                        isEditing = false
+                    val usuario = FirebaseAuth.getInstance().currentUser
+                    val credencial = EmailAuthProvider.getCredential(usuario?.email!!, contrasenaActual.text)
+                    usuario.reauthenticate(credencial).addOnCompleteListener { tarea ->
+                        if (tarea.isSuccessful) {
+                            val nuevoHistorial = HistorialMedico(
+                                idHistorialActual,
+                                nombre.text,
+                                fechaNacimiento.timeInMillis.toString(),
+                                edad.text,
+                                estadoSalud,
+                                especificaciones.text,
+                                idUsuario
+                            )
+                            if (estaEditando) {
+                                sqliteHelper.actualizarHistorial(nuevoHistorial)
+                                firebaseHelper.updateHistorial(nuevoHistorial, idUsuario)
+                            } else {
+                                sqliteHelper.insertarHistorial(nuevoHistorial)
+                                firebaseHelper.saveHistorial(nuevoHistorial, idUsuario)
+                            }
+                            // Actualizar la UI después de guardar
+                            val historialesSQLite = sqliteHelper.obtenerHistoriales().filter { it.userId == idUsuario }
+                            historiales = historialesSQLite
+                            if (historiales.isNotEmpty()) {
+                                val historialUsuario = historiales.first()
+                                nombre = TextFieldValue(historialUsuario.nombre)
+                                fechaNacimiento.time = Date(historialUsuario.fechaNacimiento.toLong())
+                                edad = TextFieldValue(historialUsuario.edad)
+                                estadoSalud = historialUsuario.estadoSalud
+                                especificaciones = TextFieldValue(historialUsuario.especificaciones)
+                                idHistorialActual = historialUsuario.id
+                                estaEditando = true
+                            } else {
+                                nombre = TextFieldValue("")
+                                fechaNacimiento = Calendar.getInstance()
+                                edad = TextFieldValue("")
+                                estadoSalud = "Optimo"
+                                especificaciones = TextFieldValue("")
+                                idHistorialActual = 0
+                                estaEditando = false
+                            }
+                        } else {
+                            // Manejar error de reautenticación
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Editar Historial" else "Guardar Historial", fontSize = 30.sp)
+                Text(if (estaEditando) "Editar Historial" else "Guardar Historial", fontSize = 30.sp)
             }
             historiales.forEach { historial ->
                 Text(
                     text = "${historial.nombre} - ${Date(historial.fechaNacimiento.toLong())} - ${historial.edad} - ${historial.estadoSalud} - ${historial.especificaciones}",
                     modifier = Modifier.padding(top = 8.dp)
                 )
+            }
+            Button(
+                onClick = { navController.navigate("panel_control") },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            ) {
+                Text("Ir al Panel de Control")
             }
         }
     }
@@ -204,42 +226,42 @@ fun DatePicker(
     var yearText by remember { mutableStateOf(TextFieldValue(year)) }
 
     Row(modifier = modifier) {
-        // Day picker
+        // Selector de día
         TextField(
             value = dayText,
-            onValueChange = { newDay ->
-                dayText = newDay
-                val dayInt = newDay.text.toIntOrNull()
-                if (dayInt != null && dayInt in 1..31) {
-                    selectedDate.set(Calendar.DAY_OF_MONTH, dayInt)
+            onValueChange = { nuevoDia ->
+                dayText = nuevoDia
+                val diaInt = nuevoDia.text.toIntOrNull()
+                if (diaInt != null && diaInt in 1..31) {
+                    selectedDate.set(Calendar.DAY_OF_MONTH, diaInt)
                     onDateChange(selectedDate)
                 }
             },
             label = { Text("Día") },
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         )
-        // Month picker
+        // Selector de mes
         TextField(
             value = monthText,
-            onValueChange = { newMonth ->
-                monthText = newMonth
-                val monthInt = newMonth.text.toIntOrNull()
-                if (monthInt != null && monthInt in 1..12) {
-                    selectedDate.set(Calendar.MONTH, monthInt - 1)
+            onValueChange = { nuevoMes ->
+                monthText = nuevoMes
+                val mesInt = nuevoMes.text.toIntOrNull()
+                if (mesInt != null && mesInt in 1..12) {
+                    selectedDate.set(Calendar.MONTH, mesInt - 1)
                     onDateChange(selectedDate)
                 }
             },
             label = { Text("Mes") },
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         )
-        // Year picker
+        // Selector de año
         TextField(
             value = yearText,
-            onValueChange = { newYear ->
-                yearText = newYear
-                val yearInt = newYear.text.toIntOrNull()
-                if (yearInt != null && yearInt > 0) {
-                    selectedDate.set(Calendar.YEAR, yearInt)
+            onValueChange = { nuevoAno ->
+                yearText = nuevoAno
+                val anoInt = nuevoAno.text.toIntOrNull()
+                if (anoInt != null && anoInt > 0) {
+                    selectedDate.set(Calendar.YEAR, anoInt)
                     onDateChange(selectedDate)
                 }
             },
