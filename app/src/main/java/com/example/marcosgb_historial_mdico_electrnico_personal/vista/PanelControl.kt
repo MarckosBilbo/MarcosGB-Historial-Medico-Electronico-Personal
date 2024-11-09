@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -51,8 +52,11 @@ fun PanelControl(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
-            Text("Número de usuarios registrados: $numeroUsuarios", fontSize = 20.sp)
+            Text("Número de usuarios registrados: $numeroUsuarios", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Encuesta de Satisfacción", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+            Spacer(modifier = Modifier.height(8.dp))
             EncuestaSatisfaccion(
                 satisfaccionServicio = satisfaccionServicio,
                 onSatisfaccionServicioChange = { satisfaccionServicio = it },
@@ -62,6 +66,9 @@ fun PanelControl(
                 onSatisfaccionUtilidadChange = { satisfaccionUtilidad = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Encuesta Médica", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+            Spacer(modifier = Modifier.height(8.dp))
             EncuestaMedica(
                 tipoProblema = tipoProblema,
                 onTipoProblemaChange = { tipoProblema = it },
@@ -71,6 +78,7 @@ fun PanelControl(
                 onLongevidadProblemaChange = { longevidadProblema = it }
             )
             Spacer(modifier = Modifier.height(16.dp))
+
             Button(onClick = {
                 perfilMedico = asignarPerfilMedico(tipoProblema, gravedadProblema, longevidadProblema)
                 // Guardar resultados en Firebase
@@ -110,7 +118,7 @@ fun EncuestaSatisfaccion(
     onSatisfaccionUtilidadChange: (String) -> Unit
 ) {
     Column {
-        Text("Satisfacción del Servicio")
+        Text("Satisfacción del Servicio", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = satisfaccionServicio == "Satisfecho", onClick = { onSatisfaccionServicioChange("Satisfecho") })
             Text("Satisfecho")
@@ -119,7 +127,7 @@ fun EncuestaSatisfaccion(
             RadioButton(selected = satisfaccionServicio == "Insatisfecho", onClick = { onSatisfaccionServicioChange("Insatisfecho") })
             Text("Insatisfecho")
         }
-        Text("Satisfacción con la Seguridad")
+        Text("Satisfacción con la Seguridad", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = satisfaccionSeguridad == "Satisfecho", onClick = { onSatisfaccionSeguridadChange("Satisfecho") })
             Text("Satisfecho")
@@ -128,7 +136,7 @@ fun EncuestaSatisfaccion(
             RadioButton(selected = satisfaccionSeguridad == "Insatisfecho", onClick = { onSatisfaccionSeguridadChange("Insatisfecho") })
             Text("Insatisfecho")
         }
-        Text("Satisfacción con la Utilidad")
+        Text("Satisfacción con la Utilidad", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = satisfaccionUtilidad == "Satisfecho", onClick = { onSatisfaccionUtilidadChange("Satisfecho") })
             Text("Satisfecho")
@@ -150,7 +158,7 @@ fun EncuestaMedica(
     onLongevidadProblemaChange: (String) -> Unit
 ) {
     Column {
-        Text("Tipo de Problema Médico")
+        Text("Tipo de Problema Médico", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = tipoProblema == "Virus", onClick = { onTipoProblemaChange("Virus") })
             Text("Virus")
@@ -159,7 +167,7 @@ fun EncuestaMedica(
             RadioButton(selected = tipoProblema == "Otro", onClick = { onTipoProblemaChange("Otro") })
             Text("Otro")
         }
-        Text("Gravedad del Problema")
+        Text("Gravedad del Problema", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = gravedadProblema == "Alta", onClick = { onGravedadProblemaChange("Alta") })
             Text("Alta")
@@ -168,7 +176,7 @@ fun EncuestaMedica(
             RadioButton(selected = gravedadProblema == "Baja", onClick = { onGravedadProblemaChange("Baja") })
             Text("Baja")
         }
-        Text("Longevidad del Problema")
+        Text("Longevidad del Problema", fontWeight = FontWeight.Bold)
         Row {
             RadioButton(selected = longevidadProblema == "Días", onClick = { onLongevidadProblemaChange("Días") })
             Text("Días")

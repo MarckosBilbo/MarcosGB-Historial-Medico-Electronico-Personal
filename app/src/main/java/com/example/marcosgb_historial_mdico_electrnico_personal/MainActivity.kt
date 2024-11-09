@@ -5,11 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.Firebase
 import com.example.marcosgb_historial_mdico_electrnico_personal.modelo.SQLite
+import com.example.marcosgb_historial_mdico_electrnico_personal.util.AlmacenamientoInterno
+import com.example.marcosgb_historial_mdico_electrnico_personal.util.SharedPreference
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaLogin
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaPrincipal
 import com.example.marcosgb_historial_mdico_electrnico_personal.vista.PantallaRegistro
@@ -27,6 +30,11 @@ class MainActivity : ComponentActivity() {
         firebaseHelper = Firebase()
         firebaseAuth = FirebaseAuth.getInstance()
 
+        // Example usage of AlmacenamientoInterno
+        AlmacenamientoInterno.guardarArchivo(this, "example.txt", "Hello, World!")
+        val contenido = AlmacenamientoInterno.leerArchivo(this, "example.txt")
+        println(contenido)
+
         setContent {
             MyApp(sqliteHelper = sqliteHelper, firebaseHelper = firebaseHelper, firebaseAuth = firebaseAuth)
         }
@@ -36,7 +44,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp(sqliteHelper: SQLite, firebaseHelper: Firebase, firebaseAuth: FirebaseAuth) {
     val navController = rememberNavController()
-    var colorFondo by remember { mutableStateOf(Color.Gray) }
+    val context = LocalContext.current
+    var colorFondo by remember { mutableStateOf(Color(SharedPreference.obtenerColorFondo(context))) }
 
     NavHost(navController = navController, startDestination = "pantalla_login") {
         composable("pantalla_login") {

@@ -2,10 +2,12 @@ package com.example.marcosgb_historial_mdico_electrnico_personal.vista
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +45,18 @@ fun PantallaPrincipal(
     var gravedadProblema by remember { mutableStateOf("") }
     var longevidadProblema by remember { mutableStateOf("") }
     var perfilMedico by remember { mutableStateOf("") }
+
+    val isFormValid by remember {
+        derivedStateOf {
+            nombre.text.isNotEmpty() && nombre.text.length <= 50 &&
+                    edad.text.isNotEmpty() && edad.text.toIntOrNull() in 0..120 &&
+                    estadoSalud.isNotEmpty() &&
+                    especificaciones.text.isNotEmpty() && especificaciones.text.length <= 200 &&
+                    fechaNacimiento.get(Calendar.DAY_OF_MONTH) in 1..31 &&
+                    fechaNacimiento.get(Calendar.MONTH) in 0..11 &&
+                    fechaNacimiento.get(Calendar.YEAR) > 0
+        }
+    }
 
     LaunchedEffect(Unit) {
         // Obtener historiales desde SQLite
@@ -107,7 +121,9 @@ fun PantallaPrincipal(
                     Button(
                         onClick = {
                             FirebaseAuth.getInstance().signOut()
-                            navController.navigate("pantalla_login")
+                            navController.navigate("pantalla_login") {
+                                popUpTo("pantalla_principal") { inclusive = true }
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                     ) {
@@ -216,23 +232,27 @@ fun PantallaPrincipal(
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isFormValid
             ) {
                 Text(if (estaEditando) "Editar Historial" else "Guardar Historial", fontSize = 30.sp)
             }
             historiales.forEach { historial ->
                 Text(
                     text = "${historial.nombre} - ${Date(historial.fechaNacimiento.toLong())} - ${historial.edad} - ${historial.estadoSalud} - ${historial.especificaciones}",
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = Color.Blue
                 )
             }
-            Text("Satisfacción del Servicio: $satisfaccionServicio", fontSize = 20.sp)
-            Text("Satisfacción con la Seguridad: $satisfaccionSeguridad", fontSize = 20.sp)
-            Text("Satisfacción con la Utilidad: $satisfaccionUtilidad", fontSize = 20.sp)
-            Text("Tipo de Problema Médico: $tipoProblema", fontSize = 20.sp)
-            Text("Gravedad del Problema: $gravedadProblema", fontSize = 20.sp)
-            Text("Longevidad del Problema: $longevidadProblema", fontSize = 20.sp)
-            Text("Perfil Médico: $perfilMedico", fontSize = 20.sp)
+            Column(modifier = Modifier.padding(top = 16.dp)) {
+                Text("Satisfacción del Servicio: $satisfaccionServicio", fontSize = 16.sp, color = Color.Magenta)
+                Text("Satisfacción con la Seguridad: $satisfaccionSeguridad", fontSize = 16.sp, color = Color.Magenta)
+                Text("Satisfacción con la Utilidad: $satisfaccionUtilidad", fontSize = 16.sp, color = Color.Magenta)
+                Text("Tipo de Problema Médico: $tipoProblema", fontSize = 16.sp, color = Color.Magenta)
+                Text("Gravedad del Problema: $gravedadProblema", fontSize = 16.sp, color = Color.Magenta)
+                Text("Longevidad del Problema: $longevidadProblema", fontSize = 16.sp, color = Color.Magenta)
+                Text("Perfil Médico: $perfilMedico", fontSize = 16.sp, color = Color.Magenta)
+            }
             Button(
                 onClick = { navController.navigate("panel_control") },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
@@ -270,6 +290,7 @@ fun DatePicker(
                 }
             },
             label = { Text("Día") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         )
         // Selector de mes
@@ -284,6 +305,7 @@ fun DatePicker(
                 }
             },
             label = { Text("Mes") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         )
         // Selector de año
@@ -298,6 +320,7 @@ fun DatePicker(
                 }
             },
             label = { Text("Año") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.weight(1f)
         )
     }
