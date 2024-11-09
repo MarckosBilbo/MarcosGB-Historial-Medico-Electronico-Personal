@@ -1,6 +1,6 @@
 # Historial Médico Electrónico Personal (Marcos_Garcia_Benito)
 
-Repositorio --> 
+Repositorio --> https://github.com/MarckosBilbo/MarcosGB-Historial-Medico-Electronico-Personal
 
 ## Resumen
 Este proyecto es una aplicación de historial médico electrónico personal desarrollada en **Kotlin** y **Java**. Utiliza **Firebase** para la autenticación y almacenamiento de datos, **SQLite** para almacenamiento local, y **Jetpack Compose** para la interfaz de usuario.
@@ -90,7 +90,7 @@ Continúa con la [configuración del proyecto](#configuración) y asegúrate de 
 
 # Agradecimientos
 
-Queremos expresar nuestro agradecimiento por su tiempo y dedicación al explorar este proyecto. Su interés y apoyo son fundamentales para el desarrollo de aplicaciones que puedan mejorar la experiencia de gestión de la salud personal. Valoramos cualquier comentario o sugerencia que pueda ayudarnos a mejorar este proyecto. ¡Gracias!
+Quiero expresar mi agradecimiento por su tiempo y dedicación al explorar este proyecto. Su interés y apoyo son fundamentales para el desarrollo de aplicaciones que puedan mejorar la experiencia de gestión de la salud personal. Valoramos cualquier comentario o sugerencia que pueda ayudarnos a mejorar este proyecto. ¡Gracias!
 
 ---
 
