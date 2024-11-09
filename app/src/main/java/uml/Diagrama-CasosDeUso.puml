@@ -1,22 +1,20 @@
 @startuml
-'https://plantuml.com/use-case-diagram
+actor Usuario
 
-:Main Admin: as Admin
-(Use the application) as (Use)
+usecase "Iniciar Sesión" as UC1
+usecase "Registrar Usuario" as UC2
+usecase "Cerrar Sesión" as UC3
+usecase "Ver Historial Médico" as UC4
+usecase "Editar Historial Médico" as UC5
+usecase "Guardar Historial Médico" as UC6
+usecase "Ver Panel de Control" as UC7
 
-User -> (Start)
-User --> (Use)
+Usuario --> UC1
+Usuario --> UC2
+Usuario --> UC3
+Usuario --> UC4
+Usuario --> UC5
+Usuario --> UC6
+Usuario --> UC7
 
-Admin ---> (Use)
-
-note right of Admin : This is an example.
-
-note right of (Use)
-A note can also
-be on several lines
-end note
-
-note "This note is connected\nto several objects." as N2
-(Start) .. N2
-N2 .. (Use)
 @enduml

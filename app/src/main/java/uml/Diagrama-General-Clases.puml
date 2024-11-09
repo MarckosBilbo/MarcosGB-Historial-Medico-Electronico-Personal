@@ -1,27 +1,126 @@
 @startuml
-'https://plantuml.com/class-diagram
+package com.example.marcosgb_historial_mdico_electrnico_personal.modelo {
+    class HistorialMedico {
+        - int id
+        - String nombre
+        - String fechaNacimiento
+        - String edad
+        - String estadoSalud
+        - String especificaciones
+        - String userId
+        + HistorialMedico()
+        + HistorialMedico(int, String, String, String, String, String, String)
+        + getId(): int
+        + getNombre(): String
+        + getFechaNacimiento(): String
+        + getEdad(): String
+        + getEstadoSalud(): String
+        + getEspecificaciones(): String
+        + getUserId(): String
+        + setId(int)
+        + setNombre(String)
+        + setFechaNacimiento(String)
+        + setEdad(String)
+        + setEstadoSalud(String)
+        + setEspecificaciones(String)
+        + setUserId(String)
+    }
 
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
+    class SQLite {
+        - static final String DATABASE_NAME
+        - static final int DATABASE_VERSION
+        - static final String TABLE_HISTORIAL
+        - static final String COLUMN_ID
+        - static final String COLUMN_NOMBRE
+        - static final String COLUMN_FECHA_NACIMIENTO
+        - static final String COLUMN_EDAD
+        - static final String COLUMN_ESTADO_SALUD
+        - static final String COLUMN_ESPECIFICACIONES
+        - static final String COLUMN_USER_ID
+        - static final String CLAVE_ENCRIPTACION
+        + SQLite(Context)
+        + onCreate(SQLiteDatabase)
+        + onUpgrade(SQLiteDatabase, int, int)
+        + insertarHistorial(HistorialMedico)
+        + actualizarHistorial(HistorialMedico)
+        + obtenerHistoriales(): List<HistorialMedico>
+    }
 
-List <|-- AbstractList
-Collection <|-- AbstractCollection
-
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-Object[] elementData
-size()
+    class Firebase {
+        - final DatabaseReference database
+        - static final String CLAVE_ENCRIPTACION
+        + Firebase()
+        + saveHistorial(HistorialMedico, String)
+        + updateHistorial(HistorialMedico, String)
+        + obtenerHistoriales(DataCallback)
+        + obtenerResultadosEncuesta(String, ResultadosEncuestaCallback)
+        + guardarResultadosEncuesta(String, String, String, String, String, String, String, String)
+    }
 }
 
-enum TimeUnit {
-DAYS
-HOURS
-MINUTES
+package com.example.marcosgb_historial_mdico_electrnico_personal.util {
+    class AlmacenamientoInterno {
+        + guardarArchivo(Context, String, String)
+        + leerArchivo(Context, String): String
+    }
+
+    class Encriptacion {
+        + encriptar(String, String): String
+        + desencriptar(String, String): String
+    }
+
+    class SharedPreference {
+        + guardarColorFondo(Context, int)
+        + obtenerColorFondo(Context): int
+    }
 }
 
+package com.example.marcosgb_historial_mdico_electrnico_personal.vista {
+    class PantallaLogin {
+        + PantallaLogin(NavHostController, FirebaseAuth)
+    }
+
+    class PantallaPrincipal {
+        + PantallaPrincipal(NavHostController, Color, SQLite, Firebase, String)
+    }
+
+    class PantallaRegistro {
+        + PantallaRegistro(NavHostController, FirebaseAuth)
+    }
+
+    class PanelControl {
+        + PanelControl(NavHostController, SQLite, Firebase, FirebaseAuth)
+    }
+}
+
+package com.example.marcosgb_historial_mdico_electrnico_personal {
+    class MainActivity {
+        - SQLite sqliteHelper
+        - Firebase firebaseHelper
+        - FirebaseAuth firebaseAuth
+        + onCreate(Bundle)
+    }
+
+    class MyApplication {
+        + onCreate()
+    }
+}
+
+MainActivity --> SQLite
+MainActivity --> Firebase
+MainActivity --> FirebaseAuth
+MainActivity --> AlmacenamientoInterno
+MainActivity --> MyApp
+MyApp --> PantallaLogin
+MyApp --> PantallaRegistro
+MyApp --> PantallaPrincipal
+MyApp --> PanelControl
+PantallaPrincipal --> SQLite
+PantallaPrincipal --> Firebase
+PantallaPrincipal --> FirebaseAuth
+PantallaLogin --> FirebaseAuth
+PantallaRegistro --> FirebaseAuth
+PanelControl --> SQLite
+PanelControl --> Firebase
+PanelControl --> FirebaseAuth
 @enduml
